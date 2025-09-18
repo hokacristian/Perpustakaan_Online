@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Beranda";
+    var featuredBooks = ViewBag.FeaturedBooks as List<Perpustakaan_Online.Models.Book>;
+    var isAuthenticated = ViewBag.IsAuthenticated as bool? ?? false;
+    var userRole = ViewBag.UserRole as string;
+}
+
+<div class="hero-section bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-book-fill me-3"></i>Perpustakaan Online
+                </h1>
+                <p class="lead mb-4">
+                    Temukan dan pinjam buku favorit Anda dengan mudah.
+                    Sistem perpustakaan digital yang modern dan efisien.
+                </p>
+                @if (!isAuthenticated)
+                {
+                    <div class="d-flex gap-3">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-4">
+                            <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex gap-3">
+                        @if (userRole == "Admin")
+                        {
+                            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-light btn-lg px-4">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard Admin
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="User" asp-action="Books" class="btn btn-light btn-lg px-4">
+                                <i class="bi bi-book me-2"></i>Jelajahi Buku
+                            </a>
+                            <a asp-controller="User" asp-action="Dashboard" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-books display-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-search display-4 text-primary mb-3"></i>
+                    <h4>Cari Buku</h4>
+                    <p class="text-muted">Temukan buku yang Anda inginkan dengan fitur pencarian yang canggih berdasarkan judul, penulis, atau kategori.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-bookmark-heart display-4 text-success mb-3"></i>
+                    <h4>Pinjam Mudah</h4>
+                    <p class="text-muted">Proses peminjaman yang simple dan cepat. Kelola peminjaman Anda dengan dashboard yang user-friendly.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-clock-history display-4 text-info mb-3"></i>
+                    <h4>Tracking Real-time</h4>
+                    <p class="text-muted">Pantau status peminjaman dan riwayat transaksi Anda secara real-time dengan notifikasi otomatis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (featuredBooks != null && featuredBooks.Any())
+    {
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">
+                    <i class="bi bi-star-fill text-warning me-2"></i>Buku Pilihan
+                </h2>
+                @if (isAuthenticated && userRole != "Admin")
+                {
+                    <a asp-controller="User" asp-action="Books" class="btn btn-outline-primary">
+                        Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                }
+            </div>
+            <div class="row">
+                @foreach (var book in featuredBooks)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">@book.Title</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person-fill me-1"></i>@book.Author
+                                    </small>
+                                </p>
+                                <p class="card-text">@(book.Description?.Length > 100 ? book.Description.Substring(0, 100) + "..." : book.Description)</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-secondary">@book.Category</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                        @book.AvailableCopies tersedia
+                                    </small>
+                                </div>
+                            </div>
+                            @if (isAuthenticated && userRole == "User")
+                            {
+                                <div class="card-footer bg-transparent border-0">
+                                    <form asp-controller="User" asp-action="BorrowBook" method="post" class="d-inline">
+                                        <input type="hidden" name="bookId" value="@book.Id" />
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                                            <i class="bi bi-bookmark-plus me-1"></i>Pinjam Buku
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="bg-light rounded-3 p-5 text-center">
+        <h3 class="fw-bold mb-3">Siap Memulai?</h3>
+        <p class="lead text-muted mb-4">
+            Bergabunglah dengan ribuan pembaca lainnya dan nikmati kemudahan akses ke koleksi buku terlengkap.
+        </p>
+        @if (!isAuthenticated)
+        {
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg px-5">
+                <i class="bi bi-person-plus-fill me-2"></i>Daftar Gratis
+            </a>
+        }
+        else
+        {
+            <p class="text-success fw-bold">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Selamat datang di Perpustakaan Online!
+            </p>
+        }
+    </section>
+</div>

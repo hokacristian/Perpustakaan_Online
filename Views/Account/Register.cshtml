@@ -1,0 +1,88 @@
+@model Perpustakaan_Online.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Daftar";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-plus-fill me-2"></i>Daftar Akun Baru
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Register" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label fw-bold">
+                                <i class="bi bi-person-fill me-1"></i>@Html.DisplayNameFor(model => model.FullName)
+                            </label>
+                            <input asp-for="FullName" class="form-control form-control-lg" placeholder="Masukkan nama lengkap Anda" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold">
+                                <i class="bi bi-envelope-fill me-1"></i>@Html.DisplayNameFor(model => model.Email)
+                            </label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="contoh@gmail.com" />
+                            <div class="form-text">
+                                <small>
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    Gunakan email dengan domain: gmail.com, hotmail.com, yahoo.com, outlook.com, dll.
+                                </small>
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold">
+                                <i class="bi bi-key-fill me-1"></i>@Html.DisplayNameFor(model => model.Password)
+                            </label>
+                            <input asp-for="Password" class="form-control form-control-lg" placeholder="Masukkan password" />
+                            <div class="form-text">
+                                <small>
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    Minimal 8 karakter, harus mengandung huruf kapital, huruf kecil, dan angka. Tanpa karakter khusus.
+                                </small>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-bold">
+                                <i class="bi bi-key-fill me-1"></i>@Html.DisplayNameFor(model => model.ConfirmPassword)
+                            </label>
+                            <input asp-for="ConfirmPassword" class="form-control form-control-lg" placeholder="Ulangi password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Sudah memiliki akun?
+                                <a asp-action="Login" class="text-decoration-none fw-bold">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Login di sini
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

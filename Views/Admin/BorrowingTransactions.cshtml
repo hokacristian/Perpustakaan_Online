@@ -1,0 +1,247 @@
+@model List<Perpustakaan_Online.Models.BorrowingTransaction>
+@{
+    ViewData["Title"] = "Kelola Peminjaman";
+    var status = ViewBag.Status as string;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold">
+                <i class="bi bi-journal-text me-2 text-info"></i>
+                Kelola Peminjaman
+            </h2>
+            <p class="text-muted">Monitor dan kelola semua transaksi peminjaman buku</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="d-flex gap-2 justify-content-md-end">
+                <button class="btn btn-outline-info" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="BorrowingTransactions">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-filter me-1"></i>Filter Status
+                        </label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="Borrowed" selected="@(status == "Borrowed")">Sedang Dipinjam</option>
+                            <option value="Returned" selected="@(status == "Returned")">Sudah Dikembalikan</option>
+                            <option value="Overdue" selected="@(status == "Overdue")">Terlambat</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>Filter
+                        </button>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        @if (!string.IsNullOrEmpty(status))
+                        {
+                            <a asp-action="BorrowingTransactions" class="btn btn-outline-secondary">
+                                <i class="bi bi-x me-1"></i>Reset Filter
+                            </a>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-bookmark-fill display-6 mb-2"></i>
+                    <h5>Sedang Dipinjam</h5>
+                    <h3>@Model.Count(t => t.Status == "Borrowed")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle-fill display-6 mb-2"></i>
+                    <h5>Dikembalikan</h5>
+                    <h3>@Model.Count(t => t.Status == "Returned")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle-fill display-6 mb-2"></i>
+                    <h5>Terlambat</h5>
+                    <h3>@Model.Count(t => t.IsOverdue)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-list-ul display-6 mb-2"></i>
+                    <h5>Total Transaksi</h5>
+                    <h3>@Model.Count</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="bi bi-table me-2"></i>Daftar Transaksi
+                @if (!string.IsNullOrEmpty(status))
+                {
+                    <span class="badge bg-secondary ms-2">@status</span>
+                }
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Pengguna</th>
+                                <th>Buku</th>
+                                <th>Tanggal Pinjam</th>
+                                <th>Jatuh Tempo</th>
+                                <th>Tanggal Kembali</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model)
+                            {
+                                <tr class="@(transaction.IsOverdue ? "table-warning" : "")">
+                                    <td>
+                                        <div>
+                                            <strong>@transaction.User.FullName</strong>
+                                            <br>
+                                            <small class="text-muted">@transaction.User.Email</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@transaction.Book.Title</strong>
+                                            <br>
+                                            <small class="text-muted">@transaction.Book.Author</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">@transaction.BorrowDate.ToString("dd/MM/yyyy")</span>
+                                    </td>
+                                    <td>
+                                        <span class="@(transaction.IsOverdue ? "text-danger fw-bold" : "text-muted")">
+                                            @transaction.DueDate.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (transaction.ReturnDate.HasValue)
+                                        {
+                                            <span class="text-success">@transaction.ReturnDate.Value.ToString("dd/MM/yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (transaction.Status == "Borrowed")
+                                        {
+                                            if (transaction.IsOverdue)
+                                            {
+                                                <span class="badge bg-danger">
+                                                    Terlambat @transaction.DaysOverdue hari
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                var daysLeft = (transaction.DueDate - DateTime.UtcNow).Days;
+                                                <span class="badge bg-info">
+                                                    @daysLeft hari lagi
+                                                </span>
+                                            }
+                                        }
+                                        else if (transaction.Status == "Returned")
+                                        {
+                                            <span class="badge bg-success">Dikembalikan</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@transaction.Status</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-info"
+                                                    onclick="viewTransactionDetail(@transaction.Id)">
+                                                <i class="bi bi-eye" title="Lihat Detail"></i>
+                                            </button>
+                                            @if (transaction.Status == "Borrowed" && transaction.IsOverdue)
+                                            {
+                                                <form asp-action="MarkAsOverdue" method="post" class="d-inline" id="overdueForm_@transaction.Id">
+                                                    <input type="hidden" name="transactionId" value="@transaction.Id" />
+                                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                                            onclick="confirmAction('Tandai Terlambat', 'Tandai transaksi ini sebagai terlambat?', 'Ya, Tandai', 'Batal').then((result) => { if (result.isConfirmed) document.getElementById('overdueForm_@transaction.Id').submit(); })"
+                                                            title="Tandai Terlambat">
+                                                        <i class="bi bi-exclamation-triangle"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">Tidak ada transaksi ditemukan</h5>
+                    @if (!string.IsNullOrEmpty(status))
+                    {
+                        <p class="text-muted">Coba dengan filter yang berbeda</p>
+                        <a asp-action="BorrowingTransactions" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Reset Filter
+                        </a>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Transaksi akan muncul ketika pengguna mulai meminjam buku</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function refreshData() {
+            location.reload();
+        }
+
+        function viewTransactionDetail(transactionId) {
+            // For now, just show an alert
+            // In a real app, you might load detailed info via AJAX
+            alert('Detail transaksi #' + transactionId + ' akan ditampilkan di sini');
+        }
+    </script>
+}

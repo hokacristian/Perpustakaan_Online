@@ -1,0 +1,106 @@
+@model List<Perpustakaan_Online.Models.Book>
+@{
+    ViewData["Title"] = "Kelola Buku";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold">
+                <i class="bi bi-books me-2 text-primary"></i>
+                Kelola Buku
+            </h2>
+            <p class="text-muted">Tambah, edit, dan hapus buku dari katalog perpustakaan</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="AddBook" class="btn btn-primary">
+                <i class="bi bi-plus-circle-fill me-1"></i>
+                Tambah Buku Baru
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Judul</th>
+                                <th>Penulis</th>
+                                <th>Kategori</th>
+                                <th>Total Eksemplar</th>
+                                <th>Tersedia</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>@book.Title</strong>
+                                            @if (!string.IsNullOrEmpty(book.Description))
+                                            {
+                                                <br>
+                                                <small class="text-muted">
+                                                    @(book.Description.Length > 50 ? book.Description.Substring(0, 50) + "..." : book.Description)
+                                                </small>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>@book.Author</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@book.Category.Name</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@book.TotalCopies</span>
+                                    </td>
+                                    <td>
+                                        @if (book.AvailableCopies > 0)
+                                        {
+                                            <span class="badge bg-success">@book.AvailableCopies</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">0</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="EditBook" asp-route-id="@book.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form asp-action="DeleteBook" method="post" class="d-inline" id="deleteBookForm_@book.Id">
+                                                <input type="hidden" name="id" value="@book.Id" />
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        onclick="confirmDelete('Yakin ingin menghapus buku @book.Title?', document.getElementById('deleteBookForm_@book.Id'))">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-book display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">Belum ada buku dalam katalog</h5>
+                    <p class="text-muted">Mulai dengan menambahkan buku pertama</p>
+                    <a asp-action="AddBook" class="btn btn-primary">
+                        <i class="bi bi-plus-circle-fill me-1"></i>
+                        Tambah Buku Pertama
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

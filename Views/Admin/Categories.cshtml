@@ -1,0 +1,154 @@
+@model List<Perpustakaan_Online.Models.Category>
+@{
+    ViewData["Title"] = "Kelola Kategori";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold">
+                <i class="bi bi-tags me-2 text-primary"></i>
+                Kelola Kategori
+            </h2>
+            <p class="text-muted">Tambah, edit, dan hapus kategori buku</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="AddCategory" class="btn btn-primary">
+                <i class="bi bi-plus-circle-fill me-1"></i>
+                Tambah Kategori Baru
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Kategori</th>
+                                <th>Deskripsi</th>
+                                <th>Jumlah Buku</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-2">@category.Name.FirstOrDefault()</span>
+                                            <strong>@category.Name</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(category.Description))
+                                        {
+                                            <span class="text-muted">@category.Description</span>
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted">Tidak ada deskripsi</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@category.Books.Count buku</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@category.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    onclick="editCategory(@category.Id, '@category.Name', '@category.Description')">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            @if (category.Books.Count == 0)
+                                            {
+                                                <form asp-action="DeleteCategory" method="post" class="d-inline" id="deleteForm_@category.Id">
+                                                    <input type="hidden" name="id" value="@category.Id" />
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            onclick="confirmDelete('Yakin ingin menghapus kategori @category.Name?', document.getElementById('deleteForm_@category.Id'))">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" disabled
+                                                        title="Tidak dapat menghapus kategori yang memiliki buku">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-tags display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">Belum ada kategori</h5>
+                    <p class="text-muted">Mulai dengan menambahkan kategori pertama</p>
+                    <a asp-action="AddCategory" class="btn btn-primary">
+                        <i class="bi bi-plus-circle-fill me-1"></i>
+                        Tambah Kategori Pertama
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editCategoryForm" method="post" asp-action="EditCategory">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Kategori
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editCategoryId" name="Id" />
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="form-label fw-bold">Nama Kategori</label>
+                        <input type="text" class="form-control" id="editCategoryName" name="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategoryDescription" class="form-label fw-bold">Deskripsi</label>
+                        <textarea class="form-control" id="editCategoryDescription" name="Description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle-fill me-1"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editCategory(id, name, description) {
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editCategoryDescription').value = description || '';
+
+            new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+        }
+    </script>
+}

@@ -1,0 +1,137 @@
+@model List<Perpustakaan_Online.Models.Book>
+@{
+    ViewData["Title"] = "Katalog Buku";
+    var categories = ViewBag.Categories as List<Perpustakaan_Online.Models.Category>;
+    var search = ViewBag.Search as string;
+    var categoryId = ViewBag.CategoryId as int?;
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">
+                <i class="bi bi-book me-2 text-primary"></i>
+                Katalog Buku
+            </h2>
+            <p class="text-muted">Jelajahi koleksi buku yang tersedia di perpustakaan</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Books">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-search me-1"></i>Pencarian
+                        </label>
+                        <input type="text" name="search" value="@search" class="form-control"
+                               placeholder="Cari berdasarkan judul, penulis, atau kategori..." />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-filter me-1"></i>Kategori
+                        </label>
+                        <select name="categoryId" class="form-select">
+                            <option value="">Semua Kategori</option>
+                            @if (categories != null)
+                            {
+                                @foreach (var cat in categories)
+                                {
+                                    <option value="@cat.Id" selected="@(cat.Id == categoryId)">@cat.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>Cari
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Books Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var book in Model)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">@book.Title</h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-person-fill me-1"></i>@book.Author
+                                </small>
+                            </p>
+                            <p class="card-text">
+                                @if (!string.IsNullOrEmpty(book.Description))
+                                {
+                                    @(book.Description.Length > 100 ? book.Description.Substring(0, 100) + "..." : book.Description)
+                                }
+                                else
+                                {
+                                    <em class="text-muted">Tidak ada deskripsi</em>
+                                }
+                            </p>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <span class="badge bg-secondary">@book.Category.Name</span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <small class="text-muted">
+                                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                        @book.AvailableCopies tersedia
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            @if (book.AvailableCopies > 0)
+                            {
+                                <form asp-controller="User" asp-action="BorrowBook" method="post" class="d-inline w-100">
+                                    <input type="hidden" name="bookId" value="@book.Id" />
+                                    <button type="submit" class="btn btn-primary w-100"
+                                            onclick="return confirm('Apakah Anda yakin ingin meminjam buku @book.Title?')">
+                                        <i class="bi bi-bookmark-plus me-1"></i>Pinjam Buku
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="bi bi-bookmark-x me-1"></i>Tidak Tersedia
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h5 class="text-muted mt-3">Tidak ada buku ditemukan</h5>
+                @if (!string.IsNullOrEmpty(search) || categoryId.HasValue)
+                {
+                    <p class="text-muted">Coba dengan kata kunci atau filter yang berbeda</p>
+                    <a asp-action="Books" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Reset Pencarian
+                    </a>
+                }
+                else
+                {
+                    <p class="text-muted">Belum ada buku tersedia di perpustakaan</p>
+                }
+            </div>
+        </div>
+    }
+</div>

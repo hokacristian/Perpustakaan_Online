@@ -1,0 +1,209 @@
+@model List<Perpustakaan_Online.Models.User>
+@{
+    ViewData["Title"] = "Kelola Pengguna";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold">
+                <i class="bi bi-people me-2 text-success"></i>
+                Kelola Pengguna
+            </h2>
+            <p class="text-muted">Daftar semua pengguna yang terdaftar dalam sistem</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="d-flex gap-2 justify-content-md-end">
+                <button class="btn btn-outline-info" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Daftar Pengguna
+                    </h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">@Model.Count pengguna</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Lengkap</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Tanggal Daftar</th>
+                                <th>Status Peminjaman</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-2">
+                                                @user.FullName.FirstOrDefault()
+                                            </div>
+                                            <strong>@user.FullName</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">@user.Email</span>
+                                    </td>
+                                    <td>
+                                        @if (user.Role == "Admin")
+                                        {
+                                            <span class="badge bg-danger">Administrator</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Pengguna</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @user.CreatedAt.ToString("dd/MM/yyyy")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var activeBorrowing = user.BorrowingTransactions
+                                                .FirstOrDefault(bt => bt.Status == "Borrowed");
+                                        }
+                                        @if (activeBorrowing != null)
+                                        {
+                                            if (activeBorrowing.IsOverdue)
+                                            {
+                                                <span class="badge bg-warning">Terlambat</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Meminjam</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Tidak Aktif</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-info"
+                                                    onclick="viewUserDetail(@user.Id, '@user.FullName', '@user.Email', '@user.CreatedAt.ToString("dd/MM/yyyy")')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            @if (user.Role != "Admin")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                                        onclick="viewBorrowHistory(@user.Id, '@user.FullName')">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-people display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">Belum ada pengguna terdaftar</h5>
+                    <p class="text-muted">Pengguna akan muncul ketika mereka mendaftar</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-circle me-2"></i>Detail Pengguna
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="userDetailContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+</style>
+
+@section Scripts {
+    <script>
+        function refreshData() {
+            location.reload();
+        }
+
+        function viewUserDetail(userId, fullName, email, createdAt) {
+            const content = `
+                <div class="row">
+                    <div class="col-sm-4"><strong>ID:</strong></div>
+                    <div class="col-sm-8">${userId}</div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4"><strong>Nama Lengkap:</strong></div>
+                    <div class="col-sm-8">${fullName}</div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4"><strong>Email:</strong></div>
+                    <div class="col-sm-8">${email}</div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4"><strong>Tanggal Daftar:</strong></div>
+                    <div class="col-sm-8">${createdAt}</div>
+                </div>
+            `;
+
+            document.getElementById('userDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+        }
+
+        function viewBorrowHistory(userId, fullName) {
+            // Redirect to borrowing transactions filtered by user
+            window.location.href = `/Admin/BorrowingTransactions?userId=${userId}`;
+        }
+    </script>
+}

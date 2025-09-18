@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Akses Ditolak";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="text-center">
+                <i class="bi bi-shield-exclamation display-1 text-danger mb-4"></i>
+                <h2 class="fw-bold text-danger mb-3">Akses Ditolak</h2>
+                <p class="lead text-muted mb-4">
+                    Anda tidak memiliki izin untuk mengakses halaman ini.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-house-fill me-1"></i>Kembali ke Beranda
+                    </a>
+                    @if (Context.Session.GetString("UserId") != null)
+                    {
+                        @if (Context.Session.GetString("UserRole") == "Admin")
+                        {
+                            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-primary">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard Admin
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="User" asp-action="Dashboard" class="btn btn-outline-primary">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard User
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
