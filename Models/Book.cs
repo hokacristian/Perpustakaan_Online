@@ -8,27 +8,25 @@ namespace Perpustakaan_Online.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Judul buku harus diisi")]
         [StringLength(200)]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Penulis harus diisi")]
         [StringLength(100)]
         public string Author { get; set; } = string.Empty;
 
-        [Required]
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Total eksemplar harus diisi")]
+        [Range(1, int.MaxValue, ErrorMessage = "Total eksemplar minimal 1")]
         public int TotalCopies { get; set; }
 
-        [Required]
         public int AvailableCopies { get; set; }
 
         public string? Description { get; set; }
 
-        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }

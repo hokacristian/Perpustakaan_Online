@@ -71,3 +71,32 @@ body {
 .navbar-nav .dropdown-toggle::after {
     vertical-align: 0.125em !important;
 }
+
+/* Password toggle button styles */
+.input-group .btn-outline-secondary {
+    border-color: #ced4da;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.input-group .btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+    border-color: #adb5bd;
+}
+
+.input-group .btn-outline-secondary:active {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* Ensure password input and button have same height */
+.input-group .form-control-lg + .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.25rem;
+}

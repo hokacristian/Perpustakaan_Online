@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Perpustakaan_Online.Models;
+using System.Linq;
 
 namespace Perpustakaan_Online.Controllers
 {
@@ -115,20 +116,71 @@ namespace Perpustakaan_Online.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddBook(Book book)
         {
-            if (ModelState.IsValid)
+            try
             {
+                // Verify category exists
+                var categoryExists = await _context.Categories.AnyAsync(c => c.Id == book.CategoryId);
+
+                // Check if basic required fields are valid
+                bool isValid = true;
+                var validationErrors = new List<string>();
+
+                if (string.IsNullOrWhiteSpace(book.Title))
+                {
+                    validationErrors.Add("Judul buku harus diisi");
+                    isValid = false;
+                }
+
+                if (string.IsNullOrWhiteSpace(book.Author))
+                {
+                    validationErrors.Add("Penulis harus diisi");
+                    isValid = false;
+                }
+
+                if (book.CategoryId <= 0)
+                {
+                    validationErrors.Add("Kategori harus dipilih");
+                    isValid = false;
+                }
+
+                if (book.TotalCopies <= 0)
+                {
+                    validationErrors.Add("Total eksemplar harus lebih dari 0");
+                    isValid = false;
+                }
+
+                if (!isValid)
+                {
+                    TempData["ErrorMessage"] = string.Join("; ", validationErrors);
+                    ViewBag.Categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+                    return View(book);
+                }
+
+                // Verify category exists
+                if (!categoryExists)
+                {
+                    TempData["ErrorMessage"] = "Kategori yang dipilih tidak valid";
+                    ViewBag.Categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+                    return View(book);
+                }
+
+                // Set required fields
                 book.AvailableCopies = book.TotalCopies;
                 book.CreatedAt = DateTime.UtcNow;
 
+                // Add and save
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Buku berhasil ditambahkan.";
                 return RedirectToAction("Books");
             }
-
-            ViewBag.Categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
-            return View(book);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error saat menyimpan: {ex.Message}";
+                ViewBag.Categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+                return View(book);
+            }
         }
 
         [RequireAdmin]

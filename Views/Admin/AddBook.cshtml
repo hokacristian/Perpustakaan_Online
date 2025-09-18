@@ -15,22 +15,21 @@
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="AddBook" method="post">
-                        @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Title" class="form-label fw-bold">
                                     <i class="bi bi-book me-1"></i>Judul Buku
                                 </label>
-                                <input asp-for="Title" class="form-control" placeholder="Masukkan judul buku" />
+                                <input asp-for="Title" class="form-control" placeholder="Masukkan judul buku" required />
                                 <span asp-validation-for="Title" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Author" class="form-label fw-bold">
                                     <i class="bi bi-person me-1"></i>Penulis
                                 </label>
-                                <input asp-for="Author" class="form-control" placeholder="Masukkan nama penulis" />
+                                <input asp-for="Author" class="form-control" placeholder="Masukkan nama penulis" required />
                                 <span asp-validation-for="Author" class="text-danger small"></span>
                             </div>
                         </div>
@@ -40,24 +39,41 @@
                                 <label asp-for="CategoryId" class="form-label fw-bold">
                                     <i class="bi bi-tag me-1"></i>Kategori
                                 </label>
-                                <select asp-for="CategoryId" class="form-select">
-                                    <option value="">Pilih kategori</option>
-                                    @if (ViewBag.Categories != null)
+                                <select asp-for="CategoryId" class="form-select" required>
+                                    <option value="0">Pilih kategori</option>
+                                    @if (ViewBag.Categories is List<Perpustakaan_Online.Models.Category> categories && categories.Any())
                                     {
-                                        @foreach (var category in ViewBag.Categories as List<Perpustakaan_Online.Models.Category> ?? new List<Perpustakaan_Online.Models.Category>())
+                                        foreach (var category in categories)
                                         {
                                             <option value="@category.Id">@category.Name</option>
                                         }
+                                    }
+                                    else
+                                    {
+                                        <option value="0" disabled>Tidak ada kategori tersedia</option>
                                     }
                                 </select>
                                 <span asp-validation-for="CategoryId" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-muted">
-                                    <i class="bi bi-info-circle me-1"></i>Informasi
+                                    <i class="bi bi-info-circle me-1"></i>Informasi Kategori
                                 </label>
-                                <input type="text" class="form-control" value="Pilih kategori dari dropdown" readonly />
-                                <small class="text-muted">Kategori dapat dikelola di menu Categories</small>
+                                <div class="d-grid">
+                                    <a asp-action="Categories" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-gear me-1"></i>Kelola Kategori
+                                    </a>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    @if (ViewBag.Categories is List<Perpustakaan_Online.Models.Category> categories)
+                                    {
+                                        <text>@categories.Count kategori tersedia</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Loading...</text>
+                                    }
+                                </small>
                             </div>
                         </div>
 
@@ -66,7 +82,7 @@
                                 <label asp-for="TotalCopies" class="form-label fw-bold">
                                     <i class="bi bi-stack me-1"></i>Total Eksemplar
                                 </label>
-                                <input asp-for="TotalCopies" type="number" min="1" class="form-control" placeholder="1" />
+                                <input asp-for="TotalCopies" type="number" min="1" class="form-control" placeholder="1" required />
                                 <span asp-validation-for="TotalCopies" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -109,46 +125,41 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const submitBtn = document.getElementById('submitBtn');
+        $(document).ready(function() {
+            // Debug: Check categories loaded
+            var categoryOptions = $('select[name="CategoryId"] option').length;
+            console.log('Number of category options loaded:', categoryOptions);
 
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+            $('select[name="CategoryId"] option').each(function() {
+                console.log('Category option:', $(this).val(), $(this).text());
+            });
 
-                // Validate form
-                const title = document.querySelector('input[name="Title"]').value.trim();
-                const author = document.querySelector('input[name="Author"]').value.trim();
-                const categoryId = document.querySelector('select[name="CategoryId"]').value;
-                const totalCopies = document.querySelector('input[name="TotalCopies"]').value;
+            $('form').on('submit', function(e) {
+                console.log('Form is being submitted');
 
-                if (!title) {
-                    showError('Judul buku harus diisi');
-                    return;
+                // Check if all required fields are filled
+                var title = $('input[name="Title"]').val();
+                var author = $('input[name="Author"]').val();
+                var categoryId = $('select[name="CategoryId"]').val();
+                var totalCopies = $('input[name="TotalCopies"]').val();
+
+                console.log('Title:', title);
+                console.log('Author:', author);
+                console.log('CategoryId:', categoryId);
+                console.log('TotalCopies:', totalCopies);
+
+                if (!title || !author || !categoryId || !totalCopies) {
+                    e.preventDefault();
+                    if (!categoryId) {
+                        alert('Kategori harus dipilih! Pastikan ada kategori yang tersedia.');
+                    } else {
+                        alert('Semua field wajib harus diisi!');
+                    }
+                    return false;
                 }
 
-                if (!author) {
-                    showError('Penulis harus diisi');
-                    return;
-                }
-
-                if (!categoryId) {
-                    showError('Kategori harus dipilih');
-                    return;
-                }
-
-                if (!totalCopies || totalCopies < 1) {
-                    showError('Total eksemplar harus diisi dengan angka minimal 1');
-                    return;
-                }
-
-                // Show loading
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Menyimpan...';
-                showLoading('Menyimpan buku...');
-
-                // Submit form
-                this.submit();
+                // Show loading state
+                $('#submitBtn').prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Menyimpan...');
             });
         });
     </script>
