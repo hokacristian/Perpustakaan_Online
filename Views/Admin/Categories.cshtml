@@ -56,7 +56,16 @@
                                         }
                                     </td>
                                     <td>
-                                        <span class="badge bg-info">@category.Books.Count buku</span>
+                                        @{
+                                            var bookCount = ViewBag.BookCounts != null && ((Dictionary<int, int>)ViewBag.BookCounts).ContainsKey(category.Id)
+                                                ? ((Dictionary<int, int>)ViewBag.BookCounts)[category.Id]
+                                                : category.Books.Count;
+                                        }
+                                        <span class="badge bg-info">@bookCount buku</span>
+                                        @if (category.Books.Count != bookCount)
+                                        {
+                                            <small class="text-danger d-block">Debug: Nav=@category.Books.Count, Calc=@bookCount</small>
+                                        }
                                     </td>
                                     <td>
                                         <small class="text-muted">@category.CreatedAt.ToString("dd/MM/yyyy")</small>
@@ -67,7 +76,12 @@
                                                     onclick="editCategory(@category.Id, '@category.Name', '@category.Description')">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            @if (category.Books.Count == 0)
+                                            @{
+                                                var canDelete = ViewBag.BookCounts != null && ((Dictionary<int, int>)ViewBag.BookCounts).ContainsKey(category.Id)
+                                                    ? ((Dictionary<int, int>)ViewBag.BookCounts)[category.Id] == 0
+                                                    : category.Books.Count == 0;
+                                            }
+                                            @if (canDelete)
                                             {
                                                 <form asp-action="DeleteCategory" method="post" class="d-inline" id="deleteForm_@category.Id">
                                                     <input type="hidden" name="id" value="@category.Id" />

@@ -164,20 +164,48 @@
                                             if (transaction.IsOverdue)
                                             {
                                                 <span class="badge bg-danger">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
                                                     Terlambat @transaction.DaysOverdue hari
                                                 </span>
                                             }
                                             else
                                             {
-                                                var daysLeft = (transaction.DueDate - DateTime.UtcNow).Days;
-                                                <span class="badge bg-info">
-                                                    @daysLeft hari lagi
-                                                </span>
+                                                var daysLeft = (transaction.DueDate.Date - DateTime.UtcNow.Date).Days;
+                                                if (daysLeft <= 1)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        @(daysLeft == 0 ? "Jatuh tempo hari ini!" : "1 hari lagi")
+                                                    </span>
+                                                }
+                                                else if (daysLeft <= 3)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        @daysLeft hari lagi
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        @daysLeft hari lagi
+                                                    </span>
+                                                }
                                             }
                                         }
                                         else if (transaction.Status == "Returned")
                                         {
-                                            <span class="badge bg-success">Dikembalikan</span>
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Dikembalikan
+                                            </span>
+                                        }
+                                        else if (transaction.Status == "Overdue")
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                Terlambat @transaction.DaysOverdue hari
+                                            </span>
                                         }
                                         else
                                         {

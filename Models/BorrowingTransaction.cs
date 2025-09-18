@@ -44,6 +44,15 @@ namespace Perpustakaan_Online.Models
         public bool IsOverdue => Status == "Borrowed" && DateTime.UtcNow > DueDate;
 
         [NotMapped]
-        public int DaysOverdue => IsOverdue ? (DateTime.UtcNow - DueDate).Days : 0;
+        public int DaysOverdue
+        {
+            get
+            {
+                if (!IsOverdue) return 0;
+                var today = DateTime.UtcNow.Date;
+                var dueDate = DueDate.Date;
+                return (today - dueDate).Days;
+            }
+        }
     }
 }

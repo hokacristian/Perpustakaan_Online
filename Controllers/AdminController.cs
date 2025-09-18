@@ -17,6 +17,9 @@ namespace Perpustakaan_Online.Controllers
         [RequireAdmin]
         public async Task<IActionResult> Dashboard()
         {
+            // Automatically update overdue status first
+            await UpdateOverdueTransactions();
+
             var totalBooks = await _context.Books.CountAsync();
             var totalUsers = await _context.Users.Where(u => u.Role == "User").CountAsync();
             var activeBorrowings = await _context.BorrowingTransactions.Where(bt => bt.Status == "Borrowed").CountAsync();
@@ -29,13 +32,16 @@ namespace Perpustakaan_Online.Controllers
             ViewBag.ActiveBorrowings = activeBorrowings;
             ViewBag.OverdueBooks = overdueBooks;
 
-            // Recent borrowings
+            // Recent borrowings with timezone-safe queries
             var recentBorrowings = await _context.BorrowingTransactions
                 .Include(bt => bt.User)
                 .Include(bt => bt.Book)
                 .OrderByDescending(bt => bt.BorrowDate)
                 .Take(10)
                 .ToListAsync();
+
+            // Pass current UTC time to view for timezone-safe calculations
+            ViewBag.CurrentUtcTime = DateTime.UtcNow;
 
             return View(recentBorrowings);
         }
@@ -53,7 +59,25 @@ namespace Perpustakaan_Online.Controllers
         [RequireAdmin]
         public async Task<IActionResult> Categories()
         {
-            var categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+            // Use a more robust approach with explicit book count calculation
+            var categoriesWithBookCount = await _context.Categories
+                .Select(c => new
+                {
+                    Category = c,
+                    BookCount = c.Books.Count()
+                })
+                .OrderBy(x => x.Category.Name)
+                .ToListAsync();
+
+            // Load the actual categories with books
+            var categories = await _context.Categories
+                .Include(c => c.Books)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            // Pass book counts separately for debugging
+            ViewBag.BookCounts = categoriesWithBookCount.ToDictionary(x => x.Category.Id, x => x.BookCount);
+
             return View(categories);
         }
 
@@ -353,6 +377,25 @@ namespace Perpustakaan_Online.Controllers
             }
 
             return RedirectToAction("Categories");
+        }
+
+        // Helper method to automatically update overdue transactions
+        private async Task UpdateOverdueTransactions()
+        {
+            var overdueTransactions = await _context.BorrowingTransactions
+                .Where(bt => bt.Status == "Borrowed" && bt.DueDate < DateTime.UtcNow)
+                .ToListAsync();
+
+            foreach (var transaction in overdueTransactions)
+            {
+                transaction.Status = "Overdue";
+                transaction.UpdatedAt = DateTime.UtcNow;
+            }
+
+            if (overdueTransactions.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
