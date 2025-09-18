@@ -27,7 +27,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-bookmark-fill display-6 mb-2"></i>
                     <h6>Sedang Dipinjam</h6>
-                    <h4>@Model.Count(t => t.Status == "Borrowed")</h4>
+                    <h4>@Model.Count(t => t.Status == "Borrowed" || t.Status == "Overdue")</h4>
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@
                         <tbody>
                             @foreach (var transaction in Model.OrderByDescending(t => t.BorrowDate))
                             {
-                                <tr class="@(transaction.IsOverdue && transaction.Status == "Borrowed" ? "table-warning" : "")">
+                                <tr class="@(transaction.IsOverdue && (transaction.Status == "Borrowed" || transaction.Status == "Overdue") ? "table-warning" : "")">
                                     <td>
                                         <div>
                                             <strong>@(transaction.Book?.Title ?? "Buku Tidak Diketahui")</strong>
@@ -103,7 +103,7 @@
                                         <small class="text-muted">@transaction.BorrowDate.ToString("HH:mm")</small>
                                     </td>
                                     <td>
-                                        <span class="@(transaction.IsOverdue && transaction.Status == "Borrowed" ? "text-danger fw-bold" : "text-muted")">
+                                        <span class="@(transaction.IsOverdue && (transaction.Status == "Borrowed" || transaction.Status == "Overdue") ? "text-danger fw-bold" : "text-muted")">
                                             @transaction.DueDate.ToString("dd/MM/yyyy")
                                         </span>
                                     </td>
@@ -120,7 +120,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (transaction.Status == "Borrowed")
+                                        @if (transaction.Status == "Borrowed" || transaction.Status == "Overdue")
                                         {
                                             if (transaction.IsOverdue)
                                             {
@@ -164,7 +164,7 @@
                                                 </small>
                                             }
                                         }
-                                        else if (transaction.Status == "Borrowed")
+                                        else if (transaction.Status == "Borrowed" || transaction.Status == "Overdue")
                                         {
                                             var currentDays = (DateTime.UtcNow - transaction.BorrowDate).Days;
                                             <span class="text-info">@currentDays hari</span>
@@ -193,7 +193,7 @@
         </div>
     </div>
 
-    @if (Model != null && Model.Any() && Model.Any(t => t.Status == "Borrowed"))
+    @if (Model != null && Model.Any() && Model.Any(t => t.Status == "Borrowed" || t.Status == "Overdue"))
     {
         <!-- Active Borrowings Alert -->
         <div class="alert alert-info border-0 shadow-sm mt-4" role="alert">
@@ -202,7 +202,7 @@
                 <div>
                     <h6 class="alert-heading mb-1">Informasi Peminjaman Aktif</h6>
                     <p class="mb-0">
-                        Anda memiliki @Model.Count(t => t.Status == "Borrowed") buku yang sedang dipinjam.
+                        Anda memiliki @Model.Count(t => t.Status == "Borrowed" || t.Status == "Overdue") buku yang sedang dipinjam.
                         Pastikan mengembalikan sebelum jatuh tempo untuk menghindari denda.
                     </p>
                 </div>

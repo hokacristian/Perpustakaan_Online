@@ -41,7 +41,7 @@ namespace Perpustakaan_Online.Models
 
         // Computed property for overdue status
         [NotMapped]
-        public bool IsOverdue => Status == "Borrowed" && DateTime.UtcNow > DueDate;
+        public bool IsOverdue => Status == "Overdue" || (Status == "Borrowed" && DateTime.UtcNow > DueDate);
 
         [NotMapped]
         public int DaysOverdue

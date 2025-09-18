@@ -20,7 +20,7 @@ namespace Perpustakaan_Online.Controllers
 
             var currentBorrowing = await _context.BorrowingTransactions
                 .Include(bt => bt.Book)
-                .Where(bt => bt.UserId == CurrentUserId && bt.Status == "Borrowed")
+                .Where(bt => bt.UserId == CurrentUserId && (bt.Status == "Borrowed" || bt.Status == "Overdue"))
                 .FirstOrDefaultAsync();
 
             ViewBag.CurrentBorrowing = currentBorrowing;
@@ -90,7 +90,7 @@ namespace Perpustakaan_Online.Controllers
 
             // Check if user already has a borrowed book
             var existingBorrowing = await _context.BorrowingTransactions
-                .AnyAsync(bt => bt.UserId == CurrentUserId && bt.Status == "Borrowed");
+                .AnyAsync(bt => bt.UserId == CurrentUserId && (bt.Status == "Borrowed" || bt.Status == "Overdue"));
 
             if (existingBorrowing)
             {
@@ -141,7 +141,7 @@ namespace Perpustakaan_Online.Controllers
 
             var transaction = await _context.BorrowingTransactions
                 .Include(bt => bt.Book)
-                .FirstOrDefaultAsync(bt => bt.Id == transactionId && bt.UserId == CurrentUserId && bt.Status == "Borrowed");
+                .FirstOrDefaultAsync(bt => bt.Id == transactionId && bt.UserId == CurrentUserId && (bt.Status == "Borrowed" || bt.Status == "Overdue"));
 
             if (transaction == null)
             {

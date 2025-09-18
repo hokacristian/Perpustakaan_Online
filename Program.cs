@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Perpustakaan_Online.Services;
+using Perpustakaan_Online.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -211,6 +212,55 @@ using (var scope = app.Services.CreateScope())
 
         context.Books.AddRange(indonesianBooks);
         context.SaveChanges();
+    }
+
+    // Check if borrowing transactions exist - create sample data with overdue examples
+    if (!context.BorrowingTransactions.Any())
+    {
+        var sampleUser = context.Users.FirstOrDefault(u => u.Email == "budi.santoso@gmail.com");
+        if (sampleUser != null)
+        {
+            var laskarPelangiBook = context.Books.FirstOrDefault(b => b.Title == "Laskar Pelangi");
+            var bumiManusiaBook = context.Books.FirstOrDefault(b => b.Title == "Bumi Manusia");
+
+            if (laskarPelangiBook != null && bumiManusiaBook != null)
+            {
+                var borrowingTransactions = new List<Perpustakaan_Online.Models.BorrowingTransaction>
+                {
+                    // Overdue transaction - borrowed 20 days ago, due 10 days ago
+                    new()
+                    {
+                        UserId = sampleUser.Id,
+                        BookId = laskarPelangiBook.Id,
+                        BorrowDate = DateTime.UtcNow.AddDays(-20),
+                        DueDate = DateTime.UtcNow.AddDays(-10),
+                        Status = "Overdue",
+                        Notes = "Peminjaman terlambat - perlu diingatkan",
+                        CreatedAt = DateTime.UtcNow.AddDays(-20),
+                        UpdatedAt = DateTime.UtcNow.AddDays(-10)
+                    },
+                    // Current borrowing - borrowed 5 days ago, due in 9 days
+                    new()
+                    {
+                        UserId = sampleUser.Id,
+                        BookId = bumiManusiaBook.Id,
+                        BorrowDate = DateTime.UtcNow.AddDays(-5),
+                        DueDate = DateTime.UtcNow.AddDays(9),
+                        Status = "Borrowed",
+                        Notes = "Peminjaman aktif",
+                        CreatedAt = DateTime.UtcNow.AddDays(-5)
+                    }
+                };
+
+                context.BorrowingTransactions.AddRange(borrowingTransactions);
+
+                // Update book availability
+                laskarPelangiBook.AvailableCopies -= 1;
+                bumiManusiaBook.AvailableCopies -= 1;
+
+                context.SaveChanges();
+            }
+        }
     }
 }
 

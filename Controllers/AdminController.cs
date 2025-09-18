@@ -24,7 +24,8 @@ namespace Perpustakaan_Online.Controllers
             var totalUsers = await _context.Users.Where(u => u.Role == "User").CountAsync();
             var activeBorrowings = await _context.BorrowingTransactions.Where(bt => bt.Status == "Borrowed").CountAsync();
             var overdueBooks = await _context.BorrowingTransactions
-                .Where(bt => bt.Status == "Borrowed" && bt.DueDate < DateTime.UtcNow)
+                .Where(bt => bt.Status == "Overdue" ||
+                           (bt.Status == "Borrowed" && bt.DueDate < DateTime.UtcNow))
                 .CountAsync();
 
             ViewBag.TotalBooks = totalBooks;
@@ -93,7 +94,9 @@ namespace Perpustakaan_Online.Controllers
             {
                 if (status == "Overdue")
                 {
-                    transactionsQuery = transactionsQuery.Where(bt => bt.Status == "Borrowed" && bt.DueDate < DateTime.UtcNow);
+                    transactionsQuery = transactionsQuery.Where(bt =>
+                        bt.Status == "Overdue" ||
+                        (bt.Status == "Borrowed" && bt.DueDate < DateTime.UtcNow));
                 }
                 else
                 {
