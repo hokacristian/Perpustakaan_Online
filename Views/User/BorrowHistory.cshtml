@@ -88,13 +88,13 @@
                                 <tr class="@(transaction.IsOverdue && transaction.Status == "Borrowed" ? "table-warning" : "")">
                                     <td>
                                         <div>
-                                            <strong>@transaction.Book.Title</strong>
+                                            <strong>@(transaction.Book?.Title ?? "Buku Tidak Diketahui")</strong>
                                             <br>
                                             <small class="text-muted">
-                                                <i class="bi bi-person me-1"></i>@transaction.Book.Author
+                                                <i class="bi bi-person me-1"></i>@(transaction.Book?.Author ?? "Penulis Tidak Diketahui")
                                             </small>
                                             <br>
-                                            <span class="badge bg-secondary">@transaction.Book.Category.Name</span>
+                                            <span class="badge bg-secondary">@(transaction.Book?.Category?.Name ?? "Kategori Tidak Diketahui")</span>
                                         </div>
                                     </td>
                                     <td>

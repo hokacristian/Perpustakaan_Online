@@ -94,10 +94,10 @@
                         <div class="card-footer bg-transparent border-0">
                             @if (book.AvailableCopies > 0)
                             {
-                                <form asp-controller="User" asp-action="BorrowBook" method="post" class="d-inline w-100">
+                                <form asp-controller="User" asp-action="BorrowBook" method="post" class="d-inline w-100" id="borrowForm_@book.Id">
                                     <input type="hidden" name="bookId" value="@book.Id" />
-                                    <button type="submit" class="btn btn-primary w-100"
-                                            onclick="return confirm('Apakah Anda yakin ingin meminjam buku @book.Title?')">
+                                    <button type="button" class="btn btn-primary w-100"
+                                            onclick="confirmAction('Pinjam Buku', 'Apakah Anda yakin ingin meminjam buku @book.Title?', 'Ya, Pinjam', 'Batal').then((result) => { if (result.isConfirmed) document.getElementById('borrowForm_@book.Id').submit(); })">
                                         <i class="bi bi-bookmark-plus me-1"></i>Pinjam Buku
                                     </button>
                                 </form>

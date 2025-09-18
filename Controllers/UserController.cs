@@ -72,6 +72,7 @@ namespace Perpustakaan_Online.Controllers
 
             var borrowHistory = await _context.BorrowingTransactions
                 .Include(bt => bt.Book)
+                    .ThenInclude(b => b.Category)
                 .Where(bt => bt.UserId == CurrentUserId)
                 .OrderByDescending(bt => bt.BorrowDate)
                 .ToListAsync();

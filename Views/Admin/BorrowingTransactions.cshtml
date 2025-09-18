@@ -120,7 +120,6 @@
                                 <th>Jatuh Tempo</th>
                                 <th>Tanggal Kembali</th>
                                 <th>Status</th>
-                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -184,25 +183,6 @@
                                         {
                                             <span class="badge bg-secondary">@transaction.Status</span>
                                         }
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-info"
-                                                    onclick="viewTransactionDetail(@transaction.Id)">
-                                                <i class="bi bi-eye" title="Lihat Detail"></i>
-                                            </button>
-                                            @if (transaction.Status == "Borrowed" && transaction.IsOverdue)
-                                            {
-                                                <form asp-action="MarkAsOverdue" method="post" class="d-inline" id="overdueForm_@transaction.Id">
-                                                    <input type="hidden" name="transactionId" value="@transaction.Id" />
-                                                    <button type="button" class="btn btn-sm btn-outline-warning"
-                                                            onclick="confirmAction('Tandai Terlambat', 'Tandai transaksi ini sebagai terlambat?', 'Ya, Tandai', 'Batal').then((result) => { if (result.isConfirmed) document.getElementById('overdueForm_@transaction.Id').submit(); })"
-                                                            title="Tandai Terlambat">
-                                                        <i class="bi bi-exclamation-triangle"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                        </div>
                                     </td>
                                 </tr>
                             }

@@ -138,7 +138,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                text: '@TempData["SuccessMessage"]',
+                text: @Html.Raw(Json.Serialize(TempData["SuccessMessage"].ToString())),
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true
@@ -151,7 +151,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',
-                text: '@TempData["ErrorMessage"]',
+                text: @Html.Raw(Json.Serialize(TempData["ErrorMessage"].ToString())),
                 showConfirmButton: true
             });
         </script>
@@ -162,7 +162,7 @@
             Swal.fire({
                 icon: 'info',
                 title: 'Informasi',
-                text: '@TempData["InfoMessage"]',
+                text: @Html.Raw(Json.Serialize(TempData["InfoMessage"].ToString())),
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true
@@ -175,7 +175,7 @@
             Swal.fire({
                 icon: 'warning',
                 title: 'Peringatan!',
-                text: '@TempData["WarningMessage"]',
+                text: @Html.Raw(Json.Serialize(TempData["WarningMessage"].ToString())),
                 showConfirmButton: true
             });
         </script>

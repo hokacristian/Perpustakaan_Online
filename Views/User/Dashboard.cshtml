@@ -120,10 +120,10 @@
                                     <p class="text-muted small mb-3">
                                         Kembalikan buku jika sudah selesai membaca
                                     </p>
-                                    <form asp-action="ReturnBook" method="post" class="d-inline">
+                                    <form asp-action="ReturnBook" method="post" class="d-inline" id="returnForm_@currentBorrowing.Id">
                                         <input type="hidden" name="transactionId" value="@currentBorrowing.Id" />
-                                        <button type="submit" class="btn btn-success"
-                                                onclick="return confirm('Apakah Anda yakin ingin mengembalikan buku ini?')">
+                                        <button type="button" class="btn btn-success"
+                                                onclick="confirmAction('Kembalikan Buku', 'Apakah Anda yakin ingin mengembalikan buku @currentBorrowing.Book.Title?', 'Ya, Kembalikan', 'Batal').then((result) => { if (result.isConfirmed) document.getElementById('returnForm_@currentBorrowing.Id').submit(); })">
                                             <i class="bi bi-check-circle-fill me-1"></i>Kembalikan Buku
                                         </button>
                                     </form>
